@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Ventify Finance | Sign In</title>
+<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16.png" />
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="brand">
+      <img src="img/logo.webp" alt="Ventify Finance" class="brand-logo brand-logo-lg" />
+    </div>
+    <p class="subtitle">Sign in to your account</p>
+    <form id="login-form">
+      <label>Username</label>
+      <input type="text" id="username" autocomplete="username" required />
+      <label>Password</label>
+      <input type="password" id="password" autocomplete="current-password" required />
+      <div class="forgot-row"><a href="forgot-password.html">Forgot password?</a></div>
+      <button type="submit">Sign In</button>
+      <p class="error" id="error-msg"></p>
+    </form>
+  </div>
+<script src="js/login.js"></script>
+</body>
+</html>

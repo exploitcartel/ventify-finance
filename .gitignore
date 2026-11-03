@@ -1,0 +1,10 @@
+node_modules/
+.env
+*.sqlite
+*.sqlite3
+db/ventify.db
+db/ventify.db-shm
+db/ventify.db-wal
+npm-debug.log
+.DS_Store
+CREDENTIALS.local.txt
