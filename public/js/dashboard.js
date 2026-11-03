@@ -477,6 +477,14 @@ document.getElementById("password-form").addEventListener("submit", async (e) =>
 });
 
 // --- AI Provider settings (admin only) ---
+function toggleAIProviderFields() {
+  const isLocal = document.getElementById("ai-provider").value === "local";
+  document.getElementById("ai-api-base-field").classList.toggle("hidden", !isLocal);
+  document.getElementById("ai-api-key-field").classList.toggle("hidden", isLocal);
+}
+
+document.getElementById("ai-provider").addEventListener("change", toggleAIProviderFields);
+
 async function loadAISettings() {
   const statusEl = document.getElementById("ai-status");
   try {
@@ -489,9 +497,13 @@ async function loadAISettings() {
     document.getElementById("ai-provider").value = data.provider || "gemini";
     document.getElementById("ai-model").value = data.model || data.defaultModel || "";
     document.getElementById("ai-model").placeholder = data.defaultModel || "e.g. gemini-2.5-flash";
+    document.getElementById("ai-api-base").value = data.apiBase || "";
+    toggleAIProviderFields();
     statusEl.textContent = data.configured
-      ? `Configured: ${data.provider} / ${data.model} (key ${data.apiKeyMasked}). The lab AI assistant is live.`
-      : "Not configured yet. The AI assistant won't respond until a key is saved here.";
+      ? data.provider === "local"
+        ? `Configured: local model at ${data.apiBase} / ${data.model}. The lab AI assistant is live.`
+        : `Configured: ${data.provider} / ${data.model} (key ${data.apiKeyMasked}). The lab AI assistant is live.`
+      : "Not configured yet. The AI assistant won't respond until this is saved.";
   } catch (err) {
     statusEl.textContent = "Could not reach the server.";
   }
@@ -502,6 +514,7 @@ document.getElementById("ai-settings-form").addEventListener("submit", async (e)
   const provider = document.getElementById("ai-provider").value;
   const model = document.getElementById("ai-model").value.trim();
   const apiKey = document.getElementById("ai-api-key").value.trim();
+  const apiBase = document.getElementById("ai-api-base").value.trim();
   const msg = document.getElementById("ai-settings-msg");
   msg.textContent = "";
   msg.className = "form-msg";
@@ -511,7 +524,7 @@ document.getElementById("ai-settings-form").addEventListener("submit", async (e)
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ provider, apiKey, model }),
+      body: JSON.stringify({ provider, apiKey, model, apiBase }),
     });
     const data = await res.json();
     if (!res.ok) {

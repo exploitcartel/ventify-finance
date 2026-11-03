@@ -289,6 +289,19 @@ const callDeepSeek = (message, user, aiConfig) =>
 const callOpenAI = (message, user, aiConfig) =>
   callOpenAiCompatible(message, user, aiConfig, "https://api.openai.com/v1/chat/completions", "gpt-4o");
 
+// Local / self-hosted model (Ollama, LM Studio, llama.cpp server, etc.) -
+// any runtime that exposes an OpenAI-compatible /v1/chat/completions
+// endpoint works here. No API key needed; the admin just points apiBase
+// at their local server.
+const callLocal = (message, user, aiConfig) =>
+  callOpenAiCompatible(
+    message,
+    user,
+    { ...aiConfig, apiKey: aiConfig.apiKey || "not-needed" },
+    aiConfig.apiBase,
+    "local-model"
+  );
+
 // --- Provider 4: Anthropic Claude (Messages API) ----------------------------
 const claudeTools = TOOL_SCHEMAS.map((t) => ({
   name: t.name,
@@ -371,6 +384,7 @@ const PROVIDERS = {
   deepseek: callDeepSeek,
   openai: callOpenAI,
   anthropic: callClaude,
+  local: callLocal,
 };
 
 router.post("/chat", requireAuth, async (req, res) => {
@@ -378,16 +392,40 @@ router.post("/chat", requireAuth, async (req, res) => {
   const user = req.currentUser;
 
   const aiConfig = getAIConfig();
-  if (!aiConfig.apiKey) {
+  const isConfigured = aiConfig.apiKey || (aiConfig.provider === "local" && aiConfig.apiBase);
+  if (!isConfigured) {
     return res.status(500).json({
       error:
         "The AI assistant isn't configured yet. Ask an admin to set it up under Account → AI Provider.",
     });
   }
 
+  // Real providers occasionally return a transient overload/unavailable error
+  // (e.g. Gemini 503 "high demand"). Retry a couple of times with a short
+  // delay before giving up - this is not a code bug, just upstream load.
+  const isTransient = (err) =>
+    /503|UNAVAILABLE|overloaded|high demand|ECONNRESET|ETIMEDOUT/i.test(err.message || "");
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
   try {
     const callProvider = PROVIDERS[aiConfig.provider] || callGemini;
-    const { text, functionCalled, functionArgs } = await callProvider(message, user, aiConfig);
+    let result, lastErr;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        result = await callProvider(message, user, aiConfig);
+        lastErr = null;
+        break;
+      } catch (err) {
+        lastErr = err;
+        if (attempt < 3 && isTransient(err)) {
+          console.error(`Agent provider error (attempt ${attempt}/3, retrying):`, err.message);
+          await sleep(1500);
+          continue;
+        }
+        throw err;
+      }
+    }
+    const { text, functionCalled, functionArgs } = result;
 
     db.prepare(
       "INSERT INTO chat_logs (user_id, message, function_called, function_args, response) VALUES (?, ?, ?, ?, ?)"

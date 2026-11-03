@@ -281,9 +281,9 @@ business_viewer at Meridian Textiles (client_id 1).
 
 The only actually-sensitive value in this lab is the AI provider's API key,
 and it's never stored in a file at all - it's configured through the app
-itself. **Four real providers are wired up** (`routes/agent.js`) - pick
-whichever you have a key for, the vulnerability behaves identically on all
-of them:
+itself. **Five real providers are wired up** (`routes/agent.js`) - pick
+whichever you have a key for (or none at all, for Local), the vulnerability
+behaves identically on all of them:
 
 | Provider | `provider` value | Example model | Get a key |
 |---|---|---|---|
@@ -291,6 +291,7 @@ of them:
 | DeepSeek | `deepseek` | `deepseek-chat` | https://platform.deepseek.com/api_keys |
 | OpenAI | `openai` | `gpt-4o` | https://platform.openai.com/api-keys |
 | Anthropic Claude | `anthropic` | `claude-sonnet-5` | https://console.anthropic.com/settings/keys |
+| Local / self-hosted | `local` | depends on your runtime | no key - run it yourself |
 
 *(Azure OpenAI is listed in the dropdown but is a placeholder - not wired
 up server-side.)*
@@ -298,11 +299,59 @@ up server-side.)*
 1. Start the server (step 5 below) and log in as `admin` / `FgDiKUzXmTiZ`
    (see the credentials table in step 3, or `CREDENTIALS.local.txt`).
 2. Go to **Account → AI Provider**, pick a provider from the dropdown,
-   paste its API key, optionally adjust the Model field (each provider has
-   a sensible default if left blank), and save.
-3. The provider, key, and model are written to the `settings` table in
-   `db/ventify.db` (itself gitignored) and cached in memory by the running
-   server. The AI assistant is now live for every logged-in user.
+   paste its API key (skip this for Local), optionally adjust the Model
+   field (each provider has a sensible default if left blank), and save.
+3. The provider, key/base URL, and model are written to the `settings`
+   table in `db/ventify.db` (itself gitignored) and cached in memory by the
+   running server. The AI assistant is now live for every logged-in user.
+
+### Running against a local model instead
+
+Picking **Local / Self-hosted** swaps the API key field for a **Base URL**
+field - point it at any server that exposes an OpenAI-compatible
+`/v1/chat/completions` endpoint, which covers most local runtimes out of
+the box:
+
+| Runtime | Typical Base URL |
+|---|---|
+| [Ollama](https://ollama.com) | `http://localhost:11434/v1/chat/completions` |
+| [LM Studio](https://lmstudio.ai) | `http://localhost:1234/v1/chat/completions` |
+
+No API key, no cost, no rate limits, no internet connection needed once the
+model is downloaded - useful for running the lab somewhere with no network,
+or for avoiding a cloud provider's free-tier quota (see the troubleshooting
+note below).
+
+**The catch: tool-calling reliability depends entirely on the model.** This
+lab's whole mechanic (the AI deciding to call `get_financial_report` etc.
+with a `clientId`) relies on the model's function/tool-calling support.
+Tested locally via Ollama: a small model explicitly tagged with `tools`
+capability (e.g. `granite3.1-moe:1b`) answered plain chat correctly but
+returned a malformed tool call as plain text instead of a structured
+`tool_calls` response - so the report-fetching and the LLM03 exploit itself
+did not work reliably. A model *without* tool support (e.g. a base
+`llama3:latest` pull) fails outright with "model does not support tools".
+Larger, instruction-tuned models with proper tool-calling support (check
+the runtime's model card) are far more likely to behave like the cloud
+providers above. Budget time to test your specific local model before
+relying on it for a live demo - a cloud provider is still the safer choice
+when reliability matters more than cost or offline use.
+
+### Troubleshooting: "The assistant is unavailable right now"
+
+The server terminal always prints the real `Agent error:` line behind this
+generic message. The two most common causes:
+
+- **A transient provider overload** (e.g. Gemini `503 UNAVAILABLE` under
+  high demand) - the app already retries automatically (3 attempts, 1.5s
+  apart) before giving up, so this usually self-resolves.
+- **A free-tier quota is exhausted** (e.g. Gemini's free tier caps
+  `gemini-3.6-flash` at 20 requests/day) - this shows as `429
+  RESOURCE_EXHAUSTED` in the terminal and is *not* retried (retrying a
+  quota error just wastes what little quota resets next). Either wait for
+  the quota to reset (the error message gives an exact time), swap in a
+  different API key, or switch to a paid tier / a different provider /
+  Local for the rest of your session.
 
 Until this is done, the chat widget replies with "The AI assistant isn't
 configured yet" instead of erroring - safe to leave the lab running before

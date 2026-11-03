@@ -297,13 +297,21 @@
               <option value="deepseek">DeepSeek</option>
               <option value="openai">OpenAI</option>
               <option value="anthropic">Anthropic Claude</option>
+              <option value="local">Local / Self-hosted (Ollama, LM Studio, ...)</option>
               <option value="azure-openai">Azure OpenAI</option>
             </select>
-            <p class="muted provider-note">Google Gemini, DeepSeek, OpenAI, and Anthropic Claude are all wired up server-side; Azure OpenAI is a placeholder for future support.</p>
+            <p class="muted provider-note">Google Gemini, DeepSeek, OpenAI, Anthropic Claude, and Local are all wired up server-side; Azure OpenAI is a placeholder for future support.</p>
             <label>Model</label>
-            <input type="text" id="ai-model" placeholder="e.g. gemini-3.6-flash, deepseek-chat, gpt-4o, claude-sonnet-5" />
-            <label>API key</label>
-            <input type="password" id="ai-api-key" placeholder="Paste the provider's API key" required />
+            <input type="text" id="ai-model" placeholder="e.g. gemini-3.6-flash, deepseek-chat, gpt-4o, claude-sonnet-5, llama3.1" />
+            <div id="ai-api-base-field">
+              <label>Base URL</label>
+              <input type="text" id="ai-api-base" placeholder="e.g. http://localhost:11434/v1/chat/completions" />
+              <p class="muted">Your local server's OpenAI-compatible chat endpoint. No API key needed.</p>
+            </div>
+            <div id="ai-api-key-field">
+              <label>API key</label>
+              <input type="password" id="ai-api-key" placeholder="Paste the provider's API key" />
+            </div>
             <button type="submit">Save</button>
             <p class="form-msg" id="ai-settings-msg"></p>
           </form>

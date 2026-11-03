@@ -19,20 +19,26 @@ router.get("/ai", requireAuth, requireRole("admin"), (req, res) => {
   res.json({
     provider: config.provider,
     model: config.model,
+    apiBase: config.apiBase,
     defaultModel: DEFAULT_MODEL,
-    configured: Boolean(config.apiKey),
+    configured: Boolean(config.apiKey) || (config.provider === "local" && Boolean(config.apiBase)),
     apiKeyMasked: config.apiKey ? maskKey(config.apiKey) : null,
   });
 });
 
 router.post("/ai", requireAuth, requireRole("admin"), (req, res) => {
-  const { provider, apiKey, model } = req.body;
+  const { provider, apiKey, model, apiBase } = req.body;
+  const resolvedProvider = (provider || "gemini").trim();
 
-  if (!apiKey || !apiKey.trim()) {
+  if (resolvedProvider === "local") {
+    if (!apiBase || !apiBase.trim()) {
+      return res.status(400).json({ error: "Base URL is required for a local/self-hosted model." });
+    }
+  } else if (!apiKey || !apiKey.trim()) {
     return res.status(400).json({ error: "API key is required." });
   }
 
-  setAIConfig((provider || "gemini").trim(), apiKey.trim(), model);
+  setAIConfig(resolvedProvider, apiKey ? apiKey.trim() : "", model, apiBase);
   res.json({ ok: true });
 });
 
