@@ -4,6 +4,8 @@
 > embedded, multi-provider AI assistant - built for a conference talk/demo
 > on securing AI agents.
 
+📸 **[See what it looks like](https://claude.ai/artifact/42a8mGGJCcWjiLjTMsgYrk)** - screenshots of the homepage, dashboard, admin console, and AI assistant, no setup required.
+
 **Stack:** Node.js · Express · SQLite · plain HTML/CSS/JS · Gemini / DeepSeek / OpenAI / Claude
 **Status:** 🔴 intentionally vulnerable - local lab use only
 
