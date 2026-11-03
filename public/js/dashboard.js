@@ -2,6 +2,12 @@ let currentUser = null;
 let invoicesRaw = [];
 let ordersRaw = [];
 
+function greetingName() {
+  if (!currentUser) return "";
+  if (currentUser.username === "admin") return "Admin";
+  return (currentUser.fullName || "").trim().split(/\s+/)[0] || currentUser.username || "";
+}
+
 async function init() {
   const meRes = await fetch("/api/auth/me", { credentials: "include" });
   if (!meRes.ok) {
@@ -16,6 +22,11 @@ async function init() {
     .split(" ").map((p) => p[0]).join("").slice(0, 2);
   document.getElementById("company-chip").textContent =
     currentUser.companyName || "All Clients (internal)";
+
+  const chatGreetingEl = document.querySelector("#chat-messages .msg.bot");
+  if (chatGreetingEl) {
+    chatGreetingEl.textContent = `Hi ${greetingName()}! I can help you summarize your account's financial reports. What would you like to know?`;
+  }
 
   if (currentUser.role === "admin") {
     document.getElementById("nav-ai-settings").classList.remove("hidden");
@@ -612,7 +623,7 @@ document.getElementById("chat-clear-btn").addEventListener("click", async (e) =>
   }
   const messages = document.getElementById("chat-messages");
   messages.innerHTML =
-    '<div class="msg bot">Hi! I can help you summarize your account\'s financial reports. What would you like to know?</div>';
+    `<div class="msg bot">Hi ${greetingName()}! I can help you summarize your account's financial reports. What would you like to know?</div>`;
 });
 
 document.getElementById("chat-form").addEventListener("submit", async (e) => {
