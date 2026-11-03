@@ -83,10 +83,10 @@ can see aggregate data across all clients.
 - **Frontend:** Plain HTML/CSS/JS, no build step - marketing homepage,
   split login page, and a dashboard with search, CSV export, and a
   persisted AI chat history
-- **AI assistant:** function calling across four real providers (Google
-  Gemini, DeepSeek, OpenAI, Anthropic Claude) - provider, model, and API
-  key are all configured at runtime from Account → AI Provider (see step
-  4)
+- **AI assistant:** function calling across five real providers (Google
+  Gemini, DeepSeek, OpenAI, Anthropic Claude, or a local/self-hosted
+  model) - provider, model, and API key (or base URL, for local) are all
+  configured at runtime from Account → AI Provider (see step 4)
 - **Data domains:** financial records (revenue/expenses/profit), invoices,
   payroll (employee names, positions, monthly salaries), warehouse
   inventory (stock items, quantities, valuations), bank transactions (cash
@@ -443,6 +443,16 @@ This is the "malicious browser extension" half of the session-hijacking
 story - `kali/meeting-notes-lab-extension/` (the extension source) and
 `kali/collector.py` (the listener that receives what it steals).
 
+`PLUGINV2/` is a second, pre-packaged build of this same idea - a
+ready-made `plugin.xpi` plus its own standalone collector
+(`PLUGINV2/server.py`, listening on port `8080`), also disguised as a
+"Meeting Notes" extension. It was used in the live talk as the
+distributable artifact (just hand someone the `.xpi`, no zip/build step),
+where `kali/meeting-notes-lab-extension/` above is the editable source for
+anyone who wants to read or modify the extension's code. Same install
+pattern as Method B below applies to it, and the same lab-only scoping
+note at the bottom of this README applies.
+
 **On Kali (`attacker.org`) - start the collector:**
 
 ```bash
@@ -585,6 +595,10 @@ clear sessions (in-memory store).
   and `attacker.org` are not real domains you control on the public
   internet - they only resolve inside the lab because you put them in each
   machine's hosts file (see "Network setup" above).
+- `PLUGINV2/` (the pre-packaged `.xpi` + its own `server.py` collector) is
+  the same tooling, same scoping rules, same lab-only warning above - it's
+  just a second, ready-to-hand-out build of the same extension described
+  in section 7.
 - No monitoring/detection dashboard is built yet - `chat_logs` captures raw
   data (message, function called, function args, response) but there's no
   alerting or visualization layer yet. That's intentional - meant to be the
