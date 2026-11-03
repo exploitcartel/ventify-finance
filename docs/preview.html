@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ventify Finance preview</title>
+<style>
+/* layout: a single scrolling column of full-width screenshots, each with a short caption below it */
+:root {
+  --bg: #f6f9fe;
+  --surface: #ffffff;
+  --border: #dbe6f7;
+  --text: #0a2e63;
+  --text-dim: #5c7ca0;
+  --accent: #0068f0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1428; --surface: #0f1d38; --border: #1c355c;
+    --text: #e8f0ff; --text-dim: #8fa8d0; --accent: #4f93ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1428; --surface: #0f1d38; --border: #1c355c;
+  --text: #e8f0ff; --text-dim: #8fa8d0; --accent: #4f93ff;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 860px; margin: 0 auto; padding-block: 2.5rem 4rem; }
+.eyebrow {
+  font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); font-weight: 500; margin: 0 0 0.5rem;
+}
+h1 {
+  font-size: clamp(26px, 4vw, 34px); font-weight: 500; margin: 0 0 0.6rem;
+  text-wrap: balance; letter-spacing: -0.01em;
+}
+.lede { color: var(--text-dim); font-size: 15px; line-height: 1.65; max-width: 62ch; margin: 0 0 2.5rem; }
+.shot { margin: 0 0 2.75rem; }
+.shot img {
+  width: 100%; display: block; border-radius: 10px;
+  border: 0.5px solid var(--border);
+}
+.shot .cap {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-top: 0.85rem; padding-left: 2px;
+}
+.shot .cap .n {
+  font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums;
+  min-width: 18px;
+}
+.shot .cap .t { font-size: 14.5px; color: var(--text); font-weight: 500; }
+.shot .cap .d { font-size: 13.5px; color: var(--text-dim); }
+footer {
+  border-top: 0.5px solid var(--border); margin-top: 1rem; padding-top: 1.25rem;
+  font-size: 13px; color: var(--text-dim);
+}
+footer a { color: var(--accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Screenshot preview</p>
+  <h1>Ventify Finance</h1>
+  <p class="lede">A bookkeeping and accounting platform with a built-in AI assistant — the lab app used to demonstrate LLM03 Excessive Agency. These are real screens from a running instance, for anyone browsing the repo without spinning it up first.</p>
+
+  <div class="shot">
+    <img src="images/vf-home.jpg" alt="Ventify Finance marketing homepage with a 3D animated bar chart hero and headline Bookkeeping and accounting, handled" />
+    <div class="cap"><span class="n">01</span><span class="t">Homepage</span><span class="d">— the public-facing marketing site</span></div>
+  </div>
+
+  <div class="shot">
+    <img src="images/vf-login.jpg" alt="Ventify Finance client login page with username and password fields" />
+    <div class="cap"><span class="n">02</span><span class="t">Client login</span><span class="d">— every client company signs in here</span></div>
+  </div>
+
+  <div class="shot">
+    <img src="images/vf-dashboard.jpg" alt="Admin dashboard showing total revenue, expenses, net profit, and a monthly financial overview line chart, scoped to all clients" />
+    <div class="cap"><span class="n">03</span><span class="t">Dashboard — admin view</span><span class="d">— platform-wide totals across every client company</span></div>
+  </div>
+
+  <div class="shot">
+    <img src="images/vf-durrant.jpg" alt="Same dashboard logged in as a client user, Marcus Durrant, scoped to just his own company Meridian Textiles" />
+    <div class="cap"><span class="n">04</span><span class="t">Dashboard — client view</span><span class="d">— same screen, logged in as a client: numbers scoped to their own company only</span></div>
+  </div>
+
+  <div class="shot">
+    <img src="images/vf-admin-charts.jpg" alt="Admin-only analytics panel showing role counts, a companies-by-industry doughnut chart, and a top-companies-by-revenue bar chart" />
+    <div class="cap"><span class="n">05</span><span class="t">Admin analytics</span><span class="d">— platform-wide view: industries served, top accounts by revenue</span></div>
+  </div>
+
+  <div class="shot">
+    <img src="images/vf-users.jpg" alt="Admin user management table listing usernames, full names, roles, and companies, with delete actions" />
+    <div class="cap"><span class="n">06</span><span class="t">User management</span><span class="d">— add, view, and remove accounts by role and company</span></div>
+  </div>
+
+  <div class="shot">
+    <img src="images/vf-chat.jpg" alt="Ventify AI Assistant chat widget answering what it can help with, listing financial, payroll, inventory, transaction, and purchase-order reports" />
+    <div class="cap"><span class="n">07</span><span class="t">AI assistant</span><span class="d">— the chat widget every account gets, function-calling into real account data</span></div>
+  </div>
+
+  <footer>Built by <a href="https://github.com/exploitcartel" target="_blank" rel="noopener">exploitcartel</a>.</footer>
+</div>
+</body>
+</html>
