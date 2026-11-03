@@ -66,6 +66,18 @@
           <span class="nav-label">Reports</span>
         </a>
 
+        <div class="nav-group hidden" id="nav-admin-group">
+          <div class="nav-group-header" data-group="admin">
+            <svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4z"/></svg>
+            <span class="nav-label">Admin</span>
+            <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="nav-subitems">
+            <a href="#" class="nav-item sub" data-view="users">Users</a>
+            <a href="#" class="nav-item sub" data-view="companies">Companies</a>
+          </div>
+        </div>
+
         <div class="nav-group">
           <div class="nav-group-header" data-group="account">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
@@ -138,6 +150,20 @@
             <thead><tr><th>Symbol</th><th>Company</th><th>Price</th><th>Change</th></tr></thead>
             <tbody></tbody>
           </table>
+        </div>
+
+        <div id="admin-analytics" class="hidden">
+          <div class="card-grid" id="admin-summary-cards"></div>
+          <div class="chart-grid-2">
+            <div class="panel">
+              <h3><svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg> Companies by Industry</h3>
+              <div class="chart-wrap small"><canvas id="industry-chart"></canvas></div>
+            </div>
+            <div class="panel">
+              <h3><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg> Top Companies by Revenue</h3>
+              <div class="chart-wrap small"><canvas id="top-companies-chart"></canvas></div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -258,6 +284,66 @@
               <span>Overdue invoices summary</span>
             </button>
           </div>
+        </div>
+      </section>
+
+      <section id="view-users" class="view hidden">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Users</h3>
+          </div>
+          <table class="data-table" id="users-table">
+            <thead><tr><th>Username</th><th>Full name</th><th>Role</th><th>Company</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="panel narrow">
+          <h3>Add a user</h3>
+          <form id="user-form">
+            <label>Username</label>
+            <input type="text" id="user-username" required />
+            <label>Full name</label>
+            <input type="text" id="user-fullname" required />
+            <label>Password</label>
+            <input type="password" id="user-password" minlength="6" required />
+            <label>Role</label>
+            <select id="user-role">
+              <option value="business_viewer">Business viewer (client)</option>
+              <option value="financial_agent">Financial agent (internal)</option>
+              <option value="admin">Admin (internal)</option>
+            </select>
+            <div id="user-company-field">
+              <label>Company</label>
+              <select id="user-company"></select>
+            </div>
+            <button type="submit">Add user</button>
+            <p class="form-msg" id="user-form-msg"></p>
+          </form>
+        </div>
+      </section>
+
+      <section id="view-companies" class="view hidden">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Companies</h3>
+          </div>
+          <table class="data-table" id="companies-table">
+            <thead><tr><th>Company</th><th>Industry</th><th>Users</th><th>Total revenue</th><th>Status</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="panel narrow">
+          <h3>Add a company</h3>
+          <form id="company-form">
+            <label>Company name</label>
+            <input type="text" id="company-name" required />
+            <label>Industry</label>
+            <input type="text" id="company-industry" placeholder="e.g. Manufacturing" required />
+            <label>Contact email (optional)</label>
+            <input type="email" id="company-email" placeholder="accounts@company.example.com" />
+            <button type="submit">Add company</button>
+            <p class="form-msg" id="company-form-msg"></p>
+          </form>
         </div>
       </section>
 

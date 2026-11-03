@@ -180,20 +180,22 @@ body { margin: 0; background: var(--blue-50); color: #1c2b36; }
 .panel h3 svg { width: 20px; height: 20px; stroke: var(--blue-700); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 .muted { color: var(--gray-600); font-size: 14px; }
 
-#password-form label, #ai-settings-form label { display: block; font-size: 13px; color: var(--gray-600); margin-bottom: 4px; margin-top: 14px; }
-#password-form input, #ai-settings-form input, #ai-settings-form select {
+#password-form label, #ai-settings-form label, #user-form label, #company-form label { display: block; font-size: 13px; color: var(--gray-600); margin-bottom: 4px; margin-top: 14px; }
+#password-form input, #ai-settings-form input, #ai-settings-form select,
+#user-form input, #user-form select, #company-form input {
   width: 100%; padding: 10px 12px; border: 1px solid var(--gray-300);
   border-radius: 8px; font-size: 14px; outline: none;
 }
-#password-form input:focus, #ai-settings-form input:focus, #ai-settings-form select:focus { border-color: var(--blue-500); }
-#password-form button, #ai-settings-form button {
+#password-form input:focus, #ai-settings-form input:focus, #ai-settings-form select:focus,
+#user-form input:focus, #user-form select:focus, #company-form input:focus { border-color: var(--blue-500); }
+#password-form button, #ai-settings-form button, #user-form button, #company-form button {
   margin-top: 18px; padding: 11px 22px; border: none;
   border-radius: 999px; background: var(--blue-700); color: white;
   font-weight: 600; font-size: 14px; cursor: pointer;
   transition: background 0.15s ease, box-shadow 0.15s ease;
   box-shadow: 0 4px 12px rgba(10, 46, 99, 0.2);
 }
-#password-form button:hover, #ai-settings-form button:hover { background: var(--blue-900); box-shadow: 0 6px 16px rgba(10, 46, 99, 0.28); }
+#password-form button:hover, #ai-settings-form button:hover, #user-form button:hover, #company-form button:hover { background: var(--blue-900); box-shadow: 0 6px 16px rgba(10, 46, 99, 0.28); }
 .form-msg { font-size: 13px; margin-top: 10px; min-height: 16px; }
 .form-msg.ok { color: var(--success); }
 .form-msg.error { color: var(--danger); }
@@ -273,6 +275,14 @@ body { margin: 0; background: var(--blue-50); color: #1c2b36; }
    maintainAspectRatio is false, or it collapses to the canvas's tiny
    intrinsic size and every line renders flat. */
 .chart-wrap { margin: 10px 0 4px; height: 280px; position: relative; }
+.chart-wrap.small { height: 220px; }
+.chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .chart-grid-2 { grid-template-columns: 1fr; } }
+.row-delete-btn {
+  border: none; background: transparent; color: var(--danger); cursor: pointer;
+  font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 6px;
+}
+.row-delete-btn:hover { background: #fbe9e7; }
 .ticker-panel .panel-header { margin-bottom: 2px; }
 .ticker-note { font-size: 11px; white-space: nowrap; }
 .ticker-up { color: var(--success); font-weight: 700; }

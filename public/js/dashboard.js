@@ -30,7 +30,12 @@ async function init() {
 
   if (currentUser.role === "admin") {
     document.getElementById("nav-ai-settings").classList.remove("hidden");
+    document.getElementById("nav-admin-group").classList.remove("hidden");
+    document.getElementById("admin-analytics").classList.remove("hidden");
     loadAISettings();
+    await loadCompanies();
+    await loadUsers();
+    await loadAdminAnalytics();
   }
 
   startMarketTicker();
@@ -752,6 +757,188 @@ function renderMarkdown(text) {
     }
   }
   return html;
+}
+
+// ---------------------------------------------------------------------------
+// Admin: Users, Companies, and dashboard analytics
+// ---------------------------------------------------------------------------
+
+let companiesRaw = [];
+
+async function loadCompanies() {
+  const res = await fetch("/api/admin/companies", { credentials: "include" });
+  if (!res.ok) return;
+  companiesRaw = await res.json();
+
+  const tbody = document.querySelector("#companies-table tbody");
+  tbody.innerHTML = companiesRaw
+    .map(
+      (c) => `<tr>
+        <td>${c.name}</td>
+        <td>${c.industry}</td>
+        <td>${c.user_count}</td>
+        <td>$${fmt(c.total_revenue)}</td>
+        <td><span class="badge badge-${c.status === "active" ? "paid" : "overdue"}">${c.status}</span></td>
+      </tr>`
+    )
+    .join("");
+
+  const select = document.getElementById("user-company");
+  const prevValue = select.value;
+  select.innerHTML = companiesRaw.map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
+  if (prevValue) select.value = prevValue;
+}
+
+document.getElementById("company-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("company-name").value.trim();
+  const industry = document.getElementById("company-industry").value.trim();
+  const contactEmail = document.getElementById("company-email").value.trim();
+  const msg = document.getElementById("company-form-msg");
+  msg.textContent = "";
+  msg.className = "form-msg";
+
+  try {
+    const res = await fetch("/api/admin/companies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ name, industry, contactEmail }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      msg.textContent = data.error || "Could not add the company.";
+      msg.classList.add("error");
+      return;
+    }
+    msg.textContent = "Company added.";
+    msg.classList.add("ok");
+    document.getElementById("company-form").reset();
+    await loadCompanies();
+  } catch (err) {
+    msg.textContent = "Could not reach the server.";
+    msg.classList.add("error");
+  }
+});
+
+async function loadUsers() {
+  const res = await fetch("/api/admin/users", { credentials: "include" });
+  if (!res.ok) return;
+  const users = await res.json();
+
+  const tbody = document.querySelector("#users-table tbody");
+  tbody.innerHTML = users
+    .map(
+      (u) => `<tr data-id="${u.id}">
+        <td>${u.username}</td>
+        <td>${u.full_name}</td>
+        <td>${u.role.replace("_", " ")}</td>
+        <td>${u.company_name || "-"}</td>
+        <td>${u.id === currentUser.id ? "" : `<button class="row-delete-btn" data-delete-user="${u.id}">Delete</button>`}</td>
+      </tr>`
+    )
+    .join("");
+}
+
+document.getElementById("user-role").addEventListener("change", (e) => {
+  document.getElementById("user-company-field").classList.toggle("hidden", e.target.value !== "business_viewer");
+});
+document.getElementById("user-company-field").classList.toggle("hidden", document.getElementById("user-role").value !== "business_viewer");
+
+document.getElementById("user-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const username = document.getElementById("user-username").value.trim();
+  const fullName = document.getElementById("user-fullname").value.trim();
+  const password = document.getElementById("user-password").value;
+  const role = document.getElementById("user-role").value;
+  const clientId = document.getElementById("user-company").value;
+  const msg = document.getElementById("user-form-msg");
+  msg.textContent = "";
+  msg.className = "form-msg";
+
+  try {
+    const res = await fetch("/api/admin/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ username, fullName, password, role, clientId }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      msg.textContent = data.error || "Could not add the user.";
+      msg.classList.add("error");
+      return;
+    }
+    msg.textContent = "User added.";
+    msg.classList.add("ok");
+    document.getElementById("user-form").reset();
+    document.getElementById("user-company-field").classList.add("hidden");
+    await loadUsers();
+  } catch (err) {
+    msg.textContent = "Could not reach the server.";
+    msg.classList.add("error");
+  }
+});
+
+document.querySelector("#users-table tbody").addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-delete-user]");
+  if (!btn) return;
+  if (!confirm("Delete this user? This cannot be undone.")) return;
+  await fetch(`/api/admin/users/${btn.dataset.deleteUser}`, { method: "DELETE", credentials: "include" });
+  loadUsers();
+});
+
+let industryChartInstance = null;
+let topCompaniesChartInstance = null;
+
+async function loadAdminAnalytics() {
+  const res = await fetch("/api/admin/analytics", { credentials: "include" });
+  if (!res.ok) return;
+  const data = await res.json();
+
+  const roleCards = data.usersByRole
+    .map(
+      (r) => `<div class="card"><div class="label">${r.role.replace("_", " ")}s</div><div class="value">${r.count}</div></div>`
+    )
+    .join("");
+  document.getElementById("admin-summary-cards").innerHTML = roleCards;
+
+  const industryCanvas = document.getElementById("industry-chart");
+  if (industryChartInstance) industryChartInstance.destroy();
+  if (industryCanvas && typeof Chart !== "undefined") {
+    industryChartInstance = new Chart(industryCanvas, {
+      type: "doughnut",
+      data: {
+        labels: data.byIndustry.map((r) => r.industry),
+        datasets: [
+          {
+            data: data.byIndustry.map((r) => r.count),
+            backgroundColor: ["#0068f0", "#1e8e5a", "#b8860b", "#c0392b", "#6f42c1", "#17a2b8", "#e67e22"],
+          },
+        ],
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right", labels: { boxWidth: 10, font: { size: 11 } } } } },
+    });
+  }
+
+  const topCanvas = document.getElementById("top-companies-chart");
+  if (topCompaniesChartInstance) topCompaniesChartInstance.destroy();
+  if (topCanvas && typeof Chart !== "undefined") {
+    topCompaniesChartInstance = new Chart(topCanvas, {
+      type: "bar",
+      data: {
+        labels: data.topCompanies.map((r) => r.name),
+        datasets: [{ label: "Revenue", data: data.topCompanies.map((r) => r.revenue), backgroundColor: "#0068f0" }],
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { ticks: { callback: (v) => "$" + Number(v).toLocaleString() } } },
+      },
+    });
+  }
 }
 
 init();
