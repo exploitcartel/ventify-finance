@@ -1,0 +1,24 @@
+PLUGIN IS READY IN PLUGIN FOLDER 
+
+plugin.xpi
+
+Config hosts into windows (victim) machine 
+
+attacker.org --> kali IP
+
+Install firefox for developer 
+
+about:config
+
+xpinstall.signatures.required   ----->			false
+
+
+Double click plugin.xpi
+
+
+Kali terminal 
+
+python3 server.py 
+
+
+YOU WILL GET THE SESSIONS
